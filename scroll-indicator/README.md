@@ -75,7 +75,7 @@ the right thing for each layout.
 | --- | --- | --- |
 | `SUPER + SHIFT + Left/Right` | move to the previous/next column (a small "bump" at the first/last one) | move the window |
 | `SUPER + M` / `SUPER + N` | swap the column left/right | swap split / toggle split |
-| `SUPER + Left/Right` | previous/next workspace | previous/next workspace |
+| `SUPER + Left/Right` | previous/next workspace; `Right` on the last workspace (10) wraps to 1 | previous/next workspace |
 
 Add to your Hyprland Lua config (change `mod` if you use another modifier, for example `"ALT"`):
 
@@ -133,7 +133,17 @@ hl.bind(mod .. " + N", per_layout({
 }))
 
 hl.bind(mod .. " + Left",  hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(mod .. " + Right", hl.dsp.focus({ workspace = "r+1" }))
+
+-- Next workspace; from the last one (10, e.g. the scrolling "drawer") wrap back to 1
+local LAST_WS = 10
+hl.bind(mod .. " + Right", function()
+    local ws = hl.get_active_workspace()
+    if ws and ws.id and ws.id >= LAST_WS then
+        hl.dispatch(hl.dsp.focus({ workspace = 1 }))
+    else
+        hl.dispatch(hl.dsp.focus({ workspace = "r+1" }))
+    end
+end)
 ```
 
 The "bump" uses `colresize`, because Hyprland's scrolling layout won't nudge the row by pixels. If your
