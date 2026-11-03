@@ -104,10 +104,10 @@ local function column_or_bump(dir)
         hl.dispatch(hl.dsp.focus({ direction = dir }))
         local after = hl.get_active_window()
         if before and after and before.address == after.address then
-            hl.dispatch(hl.dsp.layout(string.format("colresize %.6f", COLUMN_WIDTH + 0.035)))
+            hl.dispatch(hl.dsp.layout(string.format("colresize %.6f", COLUMN_WIDTH + 0.07)))
             hl.timer(function()
                 hl.dispatch(hl.dsp.layout(string.format("colresize %.6f", COLUMN_WIDTH)))
-            end, { timeout = 140, type = "oneshot" })
+            end, { timeout = 180, type = "oneshot" })
         end
     end
 end
@@ -141,6 +141,45 @@ columns aren't all the same width, drop the bump and use `hl.dsp.focus({ directi
 
 Floating windows on a scrolling workspace aren't columns: while one is focused, no dot is filled. To
 keep an app in the row, give it a `tile = true` window rule.
+
+### Optional: a "drawer" bounce when entering the scrolling workspace
+
+Makes the scrolling workspace feel like a drawer: switching to it slides in **vertically** and
+**overshoots slightly before settling** (a bounce), while every other workspace keeps a normal sideways
+slide. Hyprland's workspace rules can't set an animation per workspace, so the keybinds swap the
+`workspaces` animation just before switching.
+
+```lua
+local mod = "SUPER"
+local SCROLL_WS = 10   -- your scrolling workspace
+
+-- Overshoots past the end and settles back. Raise 1.56 for a bigger bounce; 1.0 = no bounce.
+hl.curve("drawer", { type = "bezier", points = { {0.34, 1.56}, {0.64, 1} } })
+hl.curve("smooth", { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
+
+local function goto_ws(target, move)
+    if target == SCROLL_WS then
+        hl.animation({ leaf = "workspaces", enabled = true, speed = 7, bezier = "drawer", style = "slidefadevert 25%" })
+    else
+        hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "smooth", style = "slidefade 10%" })
+    end
+    if move then
+        hl.dispatch(hl.dsp.window.move({ workspace = target, follow = true }))
+    else
+        hl.dispatch(hl.dsp.focus({ workspace = target }))
+    end
+end
+
+for i = 1, 10 do
+    local key = i % 10   -- workspace 10 is the 0 key
+    hl.bind(mod .. " + " .. key, function() goto_ws(i) end)
+    hl.bind(mod .. " + SHIFT + " .. key, function() goto_ws(i, true) end)
+end
+```
+
+This replaces your existing `mod + 1–0` and `mod + SHIFT + 1–0` workspace binds. Switching another
+way (clicking a workspace on the bar, `r+1`/`r-1` binds) uses whichever animation was set last; route
+those through `goto_ws` too if you want them consistent.
 
 The layout-aware binding style is inspired by the CachyOS and JaKooLit Hyprland configs.
 
