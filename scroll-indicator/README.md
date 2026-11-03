@@ -191,6 +191,27 @@ This replaces your existing `mod + 1–0` and `mod + SHIFT + 1–0` workspace bi
 way (clicking a workspace on the bar, `r+1`/`r-1` binds) uses whichever animation was set last; route
 those through `goto_ws` too if you want them consistent.
 
+### Pairs well with: a scroll overview
+
+Hyprland's scrolling layout ships without two things that make it easy to live with: a **position
+indicator** (this widget) and an **overview** of the whole row. For the overview, the
+[hyprland-scroll-overview](https://github.com/yayuuu/hyprland-scroll-overview) plugin by yayuuu shows
+every workspace and column zoomed out, Niri-style, and lets you jump around with the arrow keys:
+
+```sh
+hyprpm add https://github.com/yayuuu/hyprland-scroll-overview.git
+hyprpm update
+hyprpm enable scrolloverview
+```
+
+Bind it (and its arrow keys) as its README describes, for example a toggle on `mod + TAB`. Define its
+`scrolloverview` submap **once**: defining it in two config files binds every key twice, so each press
+fires twice.
+
+Some versions of the overview stop responding to Left/Right when a **floating** window is selected on
+a scrolling workspace. If you hit that, update the plugin, or give apps you park there a
+`tile = true` window rule.
+
 The layout-aware binding style is inspired by the CachyOS and JaKooLit Hyprland configs.
 
 ## Notes
