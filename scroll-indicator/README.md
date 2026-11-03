@@ -67,8 +67,8 @@ the right thing for each layout.
 
 > **This is the author's setup**, tuned for mostly tiling with one scrolling "drawer" workspace for apps
 > kept open in the background. It makes workspace switching the easiest key, and scrolling columns
-> `SHIFT + arrows`. Plain focus moves and column swaps exist but get used less. On a keyboard without a
-> Super key (the author's), the modifier is `ALT`. If you live *in* the scrolling layout, you'll probably
+> `SHIFT + arrows`. Plain focus moves and column swaps exist but get used less. The author uses `ALT` as
+> the modifier; set `mod` to whatever you use. If you live *in* the scrolling layout, you'll probably
 > prefer plain arrows for columns, Niri-style. Adapt freely.
 
 | Keys | On a scrolling workspace | On other layouts |
