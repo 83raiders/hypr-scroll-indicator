@@ -1,3 +1,4 @@
+--!nonstrict
 -- Scroll indicator: on a workspace using Hyprland's scrolling layout, shows one dot per
 -- column (● = focused column, ○ = others). Hidden on every other layout.
 -- Idea from jtams/waybar-hyprland-scroll-indicator (Go/Waybar); independent Luau implementation.
