@@ -60,6 +60,84 @@ hl.config({
 
 The widget works with any column width and on any workspace using the scrolling layout.
 
+### Example keybinds
+
+Optional, but they make a scrolling workspace pleasant to use next to normal tiling. The same keys do
+the right thing for each layout:
+
+| Keys | On a scrolling workspace | On other layouts |
+| --- | --- | --- |
+| `SUPER + SHIFT + Left/Right` | move to the previous/next column (a small "bump" at the first/last one) | move the window |
+| `SUPER + M` / `SUPER + N` | swap the column left/right | swap split / toggle split |
+| `SUPER + Left/Right` | previous/next workspace | previous/next workspace |
+
+Add to your Hyprland Lua config (change `mod` if you use another modifier, for example `"ALT"`):
+
+```lua
+local mod = "SUPER"
+local COLUMN_WIDTH = 2/3   -- keep in sync with scrolling.column_width
+
+-- Run a different action depending on the focused workspace's layout.
+-- Each action is a dispatcher (hl.dsp.*) or a function.
+local function per_layout(actions)
+    return function()
+        local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+        local action = ws and actions[ws.tiled_layout]
+        if type(action) == "function" then
+            action()
+        elseif action then
+            hl.dispatch(action)
+        end
+    end
+end
+
+-- Focus the next column; if focus didn't move (first/last column), briefly widen it as a "bump".
+local function column_or_bump(dir)
+    return function()
+        local before = hl.get_active_window()
+        hl.dispatch(hl.dsp.focus({ direction = dir }))
+        local after = hl.get_active_window()
+        if before and after and before.address == after.address then
+            hl.dispatch(hl.dsp.layout(string.format("colresize %.6f", COLUMN_WIDTH + 0.035)))
+            hl.timer(function()
+                hl.dispatch(hl.dsp.layout(string.format("colresize %.6f", COLUMN_WIDTH)))
+            end, { timeout = 140, type = "oneshot" })
+        end
+    end
+end
+
+hl.bind(mod .. " + SHIFT + Left", per_layout({
+    scrolling = column_or_bump("l"),
+    dwindle   = hl.dsp.window.move({ direction = "l" }),
+    master    = hl.dsp.window.move({ direction = "l" }),
+}))
+hl.bind(mod .. " + SHIFT + Right", per_layout({
+    scrolling = column_or_bump("r"),
+    dwindle   = hl.dsp.window.move({ direction = "r" }),
+    master    = hl.dsp.window.move({ direction = "r" }),
+}))
+
+hl.bind(mod .. " + M", per_layout({
+    scrolling = hl.dsp.layout("swapcol l"),
+    dwindle   = hl.dsp.layout("swapsplit"),
+}))
+hl.bind(mod .. " + N", per_layout({
+    scrolling = hl.dsp.layout("swapcol r"),
+    dwindle   = hl.dsp.layout("togglesplit"),
+}))
+
+hl.bind(mod .. " + Left",  hl.dsp.focus({ workspace = "r-1" }))
+hl.bind(mod .. " + Right", hl.dsp.focus({ workspace = "r+1" }))
+```
+
+The "bump" uses `colresize`, because Hyprland's scrolling layout won't nudge the row by pixels. If your
+columns aren't all the same width, drop the bump and use `hl.dsp.focus({ direction = "l" })` directly.
+
+Floating windows on a scrolling workspace aren't columns: while one is focused, no dot is filled. To
+keep an app in the row, give it a `tile = true` window rule.
+
+The layout-aware binding style is inspired by the CachyOS and JaKooLit Hyprland configs.
+
 ## Notes
 
 Everything the plugin runs:
