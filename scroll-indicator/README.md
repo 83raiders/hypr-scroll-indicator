@@ -10,6 +10,31 @@ layout it hides itself.
 
 Hover for "Scrolling: column 2 of 4".
 
+## Why
+
+Hyprland's scrolling layout has no built-in position indicator: you can't tell how many windows
+are off-screen or where you are in the row. This adds one.
+
+## Example setup
+
+Built for one scrolling workspace with **2/3-width columns** on a large (4K) screen, used as a
+parking spot for apps you want to keep open but don't need to look at often (Hyprland has no
+minimize). Each window keeps plenty of room, and a slice of the next column stays visible.
+
+```lua
+-- Hyprland Lua config: workspace 10 (the ALT+0 key) uses the scrolling layout
+hl.workspace_rule({ workspace = "10", layout = "scrolling", persistent = true })
+
+hl.config({
+  scrolling = {
+    column_width = 2/3,
+    follow_focus = true,
+  },
+})
+```
+
+The widget works with any column width and on any workspace using the scrolling layout.
+
 ## Install
 
 ```sh
