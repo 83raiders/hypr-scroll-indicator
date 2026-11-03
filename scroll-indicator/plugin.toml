@@ -1,0 +1,14 @@
+id           = "83raiders/scroll-indicator"
+name         = "Scroll Indicator"
+version      = "1.0.0"
+plugin_api   = 24
+author       = "83raiders"
+license      = "MIT"
+icon         = "dots"
+description  = "Dots showing your position in a Hyprland scrolling-layout workspace. Hidden on other layouts."
+tags         = ["hyprland", "workspace", "scrolling"]
+dependencies = ["hyprctl", "socat"]
+
+[[widget]]
+id    = "dots"
+entry = "widget.luau"

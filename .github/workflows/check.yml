@@ -1,0 +1,33 @@
+# Basic checks on every PR and push to main: manifest and catalog parse, versions match,
+# required files exist, translations are valid JSON, and the Luau compiles.
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Manifest, catalog and files
+        run: python3 .github/scripts/check.py
+
+      - name: Install Luau
+        run: |
+          curl -fsSL -o luau.zip https://github.com/luau-lang/luau/releases/download/0.650/luau-ubuntu.zip
+          unzip -q luau.zip -d "$HOME/luau"
+          echo "$HOME/luau" >> "$GITHUB_PATH"
+
+      - name: Luau compiles
+        run: |
+          for f in $(find . -name '*.luau' -not -path './.git/*'); do
+            echo "compiling $f"
+            luau-compile --null "$f"
+          done
