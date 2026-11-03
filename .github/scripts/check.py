@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 VERSION_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*$")
-REQUIRED = ["plugin.toml", "README.md", "translations/en.json"]
+REQUIRED = ["plugin.toml", "README.md", "translations/en.json", "thumbnail.webp"]
 
 errors = []
 
