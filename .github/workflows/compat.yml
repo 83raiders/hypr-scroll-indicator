@@ -1,0 +1,73 @@
+# Weekly compatibility check against the latest Hyprland release and Noctalia main.
+# Produces a report (job summary + downloadable artifact). If anything the widget depends on
+# disappeared upstream, opens an issue (or comments on the open one) so the owner can ask @claude.
+name: Weekly compatibility check
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"   # Mondays 09:17 UTC
+  workflow_dispatch:       # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch upstream sources
+        run: |
+          HYPR_VERSION=$(gh api repos/hyprwm/Hyprland/releases/latest --jq .tag_name)
+          git clone -q --depth 1 --branch "$HYPR_VERSION" https://github.com/hyprwm/Hyprland.git "$RUNNER_TEMP/hypr"
+          git clone -q --depth 1 https://github.com/noctalia-dev/noctalia.git "$RUNNER_TEMP/noct"
+          NOCT_VERSION="main@$(git -C "$RUNNER_TEMP/noct" rev-parse --short HEAD)"
+          {
+            echo "HYPR_SRC=$RUNNER_TEMP/hypr"
+            echo "NOCT_SRC=$RUNNER_TEMP/noct"
+            echo "HYPR_VERSION=$HYPR_VERSION"
+            echo "NOCT_VERSION=$NOCT_VERSION"
+          } >> "$GITHUB_ENV"
+
+      - name: Check compatibility
+        id: compat
+        continue-on-error: true
+        run: python3 .github/scripts/compat.py
+
+      - name: Job summary
+        if: always()
+        run: cat compat-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compat-report-${{ env.HYPR_VERSION }}-${{ github.run_number }}
+          path: |
+            compat-report.md
+            compat-report.json
+          retention-days: 90
+
+      - name: Open or update issue on failure
+        if: steps.compat.outcome == 'failure'
+        run: |
+          TITLE="Weekly compatibility check failed"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY="$(cat compat-report.md)
+
+          Run: $RUN_URL"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
+
+      - name: Fail the run if incompatible
+        if: steps.compat.outcome == 'failure'
+        run: exit 1

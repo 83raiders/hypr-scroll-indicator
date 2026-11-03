@@ -23,6 +23,14 @@ Docs: https://docs.noctalia.dev/noctalia/plugins/development/ (manifest, entries
 - Live updates come from `noctalia.runStream(<string command>, callback)` running `socat` on
   Hyprland's `.socket2.sock`; polling every 2 s is the fallback.
 
+## CI
+
+- `check.yml` (every PR): `.github/scripts/check.py` validates manifest/catalog/files; Luau must compile.
+- `compat.yml` (weekly + manual): `.github/scripts/compat.py` searches the latest Hyprland release and
+  Noctalia main for every API call, hyprctl JSON field and event the widget uses. If you make the widget
+  read a new hyprctl field, add it to `HYPR_JSON_FIELDS` in that script. When this check opens an issue,
+  find what was renamed/removed upstream and fix the widget.
+
 ## Known gotchas (learned the hard way)
 
 - Hyprland 0.56 removed numeric `workspace.id` from `hyprctl -j clients`/`activewindow`; match by
