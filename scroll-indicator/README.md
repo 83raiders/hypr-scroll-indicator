@@ -8,6 +8,11 @@ focused column and **○** for the rest. It hides itself on workspaces that don'
 ○ ● ○ ○      ← 4 columns, the 2nd is focused
 ```
 
+Further down there's also optional Hyprland config for **visual cues**, which work even if you never
+look at the bar: a small **bump** when you hit the first/last column
+([Example keybinds](#example-keybinds)), and a vertical **drawer bounce** when you enter the scrolling
+workspace ([Drawer bounce](#optional-a-drawer-bounce-when-entering-the-scrolling-workspace)).
+
 ## Plugin
 
 | Field | Value |
